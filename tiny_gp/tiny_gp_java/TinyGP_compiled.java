@@ -2,21 +2,20 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.io.*;
-import py4j.GatewayServer;
 
 public class TinyGP {
     // operations
     public static final int
             ADD = 110,
-            SUB = 113,
-            MUL = 114,
-            DIV = 111,
-            EXP = 112,
+            SUB = 111,
+            MUL = 112,
+            DIV = 113,
+            EXP = 114,
             SIN = 115,
             COS = 116,
             FSET_START = 110,
-            FSET_2ARG_END = 111,  //last 2 argument function, start of 1 argument functions
-            FSET_END = 112;  // last operation available
+            FSET_2ARG_END = 113,  //last 2 argument function, start of 1 argument functions
+            FSET_END = 113;  // last operation available
 
     // settings
     public static final double
@@ -28,7 +27,7 @@ public class TinyGP {
             MAX_LEN = 10000,
             POPSIZE = 100000,
             DEPTH   = 5,
-            GENERATIONS = 10,
+            GENERATIONS = 100,
             TSIZE = 2;
     public static final double
             minrandom = -5.0,
@@ -613,9 +612,18 @@ public class TinyGP {
     }
 
     public TinyGP() {
-        GatewayServer server = new GatewayServer(this);
-        server.start();
+//         GatewayServer server = new GatewayServer(this);
+//         server.start();
         System.out.println("Server started");
+        this.evolve();
+        System.out.println("TOKEN");
+        for (double v : TinyGP.x) {
+            System.out.print(Double.toString(v) + " ");
+        }
+        System.out.println();
+        for (Hist h : TinyGP.hist) {
+            System.out.println(h);
+        }
     }
 
     public static void main(String[] args) {
@@ -625,39 +633,48 @@ public class TinyGP {
     }
 }
 
-class Hist {
-    public int gen;
-    public double avg_fitness;
-    public double best_fitness;
-    public double avg_size;
-    public char[] best_individual;
+    class Hist {
+        public int gen;
+        public double avg_fitness;
+        public double best_fitness;
+        public double avg_size;
+        public char[] best_individual;
 
-    public Hist(int gen, double avg_fitness, double best_fitness, double avg_size, char[] best_individual) {
-        this.gen = gen;
-        this.avg_fitness = avg_fitness;
-        this.best_fitness = best_fitness;
-        this.avg_size = avg_size;
-        this.best_individual = new char[best_individual.length];
-        System.arraycopy(best_individual, 0, this.best_individual, 0, best_individual.length);
-    }
+        public Hist(int gen, double avg_fitness, double best_fitness, double avg_size, char[] best_individual) {
+            this.gen = gen;
+            this.avg_fitness = avg_fitness;
+            this.best_fitness = best_fitness;
+            this.avg_size = avg_size;
+            this.best_individual = new char[best_individual.length];
+            System.arraycopy(best_individual, 0, this.best_individual, 0, best_individual.length);
+        }
 
-    public char[] getBest_individual() {
-        return best_individual;
-    }
+        public char[] getBest_individual() {
+            return best_individual;
+        }
 
-    public double getAvg_size() {
-        return avg_size;
-    }
+        public double getAvg_size() {
+            return avg_size;
+        }
 
-    public double getBest_fitness() {
-        return best_fitness;
-    }
+        public double getBest_fitness() {
+            return best_fitness;
+        }
 
-    public double getAvg_fitness() {
-        return avg_fitness;
-    }
+        public double getAvg_fitness() {
+            return avg_fitness;
+        }
 
-    public int getGen() {
-        return gen;
+        public int getGen() {
+            return gen;
+        }
+
+        @Override
+        public String toString() {
+        return gen + " " +
+               avg_fitness + " " +
+               best_fitness + " " +
+               avg_size + " " +
+               Arrays.toString(new String(best_individual).chars().toArray()).replaceAll("[\\[\\],]", "");
+        }
     }
-}

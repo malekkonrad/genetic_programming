@@ -88,50 +88,47 @@ def fit(self: "TinyGP", targets: np.ndarray, seed: int = -1):
     with open(f"{module_dir}/tiny_gp_java/TinyGP_compiled.java", 'w', encoding='utf-8') as f:
         f.write(compiled)
 
+    is_token = False
+    output: str = ""
+
     def run_java():
         """
         start TinyGP.java
         """
+        nonlocal is_token
+        nonlocal output
         process = subprocess.Popen(
-            [self.java_path, "-Dfile.encoding=UTF-8", "-cp", f"{module_dir}/tiny_gp_java/py4j-0.10.9.9.jar",
-             f"{module_dir}/tiny_gp_java/TinyGP_compiled.java"],
+            [self.java_path, "-Dfile.encoding=UTF-8", f"{module_dir}/tiny_gp_java/TinyGP_compiled.java"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             encoding='utf-8'
         )
         for line in process.stdout:
-            if "\\r" in line:
+            if is_token:
+                output += line
+            elif "TOKEN" in line:
+                is_token = True
+            elif "\\r" in line:
                 print(line.replace("\\r", "\r").rstrip("\n"), end="")
             else:
                 print(line, end="")
 
-    gateway: JavaGateway | None = None
-    thread: threading.Thread | None = None
+    run_java()
 
-    try:
-        thread = threading.Thread(target=run_java)
-        thread.start()
+    x = list(map(float, output.split("\n")[0].split()))
 
-        gateway = JavaGateway()
-        tiny_gp = gateway.entry_point
-        tiny_gp.evolve()
-
-        x = list(tiny_gp.getX())
-
-        for h in tiny_gp.getHist():
-            self.hist.append(Entry(
-                int(h.getGen()),
-                float(h.getAvg_fitness()),
-                float(h.getBest_fitness()),
-                float(h.getAvg_size()),
-                Individual(list(h.getBest_individual()), x, self.var_number)
+    for line in output.split("\n")[1:]:
+        numbers = line.split()
+        if len(numbers) == 0:
+            continue
+        self.hist.append(Entry(
+                int(numbers[0]),
+                float(numbers[1]),
+                float(numbers[2]),
+                float(numbers[3]),
+                Individual(list(map(chr, map(int, list(numbers[4:])))), x, self.var_number)
             ))
-    finally:
-        if gateway:
-            gateway.shutdown()
-        if thread:
-            thread.join()
 
     for e in self.hist.entries:
         e.best_individual.operations = operations

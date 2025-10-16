@@ -103,7 +103,7 @@ class TinyGP:
 
     def _map_operations(self) -> dict[str, int]:
         """
-        :return: Dictionary mapping operation name to it's integer value,
+        :return: Dictionary mapping operation name to its integer value,
                  also adds FSET_END and FSET_2ARG_END
         """
         return tiny_gp_methods.map_operations(self)
