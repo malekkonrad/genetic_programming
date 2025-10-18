@@ -44,8 +44,9 @@ def map_operations(self: "TinyGP") -> dict[str, int]:
 
 def fit(self: "TinyGP", targets: np.ndarray, seed: int = -1):
     self.seed = seed
-    self.targets = targets
+    # self.targets = targets
     self.var_number = targets.shape[1] - 1
+    print(self.var_number)
     self.fitness_cases = targets.shape[0]
     self.hist = Hist()  # reset history
     assert self.var_number + self.constant_count <= FSET_START, f"Sum of variable count and constant count must be less than {FSET_START}."
@@ -74,7 +75,8 @@ def fit(self: "TinyGP", targets: np.ndarray, seed: int = -1):
         "PMUT_PER_NODE": float(self.permutation_per_node),
         "CROSSOVER_PROB": float(self.crossover_probability),
         "seed": int(self.seed),
-        "targets": np.array2string(self.targets, separator=',').replace("[", "{").replace("]", "}"),
+        # "targets": np.array2string(self.targets, separator=',').replace("[", "{").replace("]", "}"),
+        # "file_name": str(self.file_name),
         "fitness_function": self.fitness_function,
         "goal_fitness": self.goal_fitness,
         "FSET_START": FSET_START,

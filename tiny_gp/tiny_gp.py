@@ -10,6 +10,7 @@ class TinyGP:
     """
     TinyGP.
     """
+    # file_name: str = "/data/problem4_a.dat"
     max_length: int = 10000
     population_size: int = 100000
     depth: int = 5
@@ -21,7 +22,7 @@ class TinyGP:
     constant_count: int = 100
     permutation_per_node: float = 0.05
     crossover_probability: float = 0.9
-    targets: np.ndarray = None
+    # targets: np.ndarray = None
     fitness_cases: int | None = None
     seed: int = -1
     hist: Hist = Hist()

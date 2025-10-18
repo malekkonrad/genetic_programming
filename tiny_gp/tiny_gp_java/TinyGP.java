@@ -51,14 +51,61 @@ public class TinyGP {
     static Random rd = new Random();
     static double [] x = new double[FSET_START];
     static double avg_len;
-    public static final double [][] targets = //TAG{targets};
+    // public static final double [][] targets = //TAG{targets};
     
+    public static double[][] targets;
+
+    // public static String file_name = //TAG{file_name};
+
+    public static String file = "./data/problem4_a.dat";
+
     // cache variables
     static double[] numbers;
     static char[] operations;
     static int PC;
     static double[] variables;
     static int length;
+
+
+
+    static void loadTargets() {
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            String line = in.readLine();
+            targets = new double[fitnesscases][varnumber + 1];
+            
+            for (int i = 0; i < fitnesscases; i++) {
+                line = in.readLine();
+                if (line == null) {
+                    throw new IOException("Unexpected end of file at line " + (i + 2));
+                }
+                
+                StringTokenizer tokens = new StringTokenizer(line);
+                
+                for (int j = 0; j <= varnumber; j++) {
+                    if (!tokens.hasMoreTokens()) {
+                        throw new IOException("Not enough values in line " + (i + 2));
+                    }
+                    targets[i][j] = Double.parseDouble(tokens.nextToken().trim());
+                }
+            }
+        } 
+        catch (FileNotFoundException e) {
+            System.err.println("ERROR: Data file not found: " + file);
+            System.exit(1);
+        } 
+        catch (NumberFormatException e) {
+            System.err.println("ERROR: Invalid number format in data file");
+            System.exit(1);
+        } 
+        catch (IOException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            System.exit(1);
+        } 
+        catch (Exception e) {
+            System.err.println("ERROR: Unexpected error while reading data file: " + e.getMessage());
+            System.exit(1);
+        }
+    }
 
     void simplify(char[] prog) {
         // simplify the individual
@@ -515,6 +562,9 @@ public class TinyGP {
 //         GatewayServer server = new GatewayServer(this);
 //         server.start();
         System.out.println("Server started");
+
+        loadTargets();
+    
         this.evolve();
         System.out.println("TOKEN");
         for (double v : TinyGP.x) {

@@ -30,12 +30,12 @@ public class TinyGP {
             GENERATIONS = 100,
             TSIZE = 2;
     public static final double
-            minrandom = -5.0,
-            maxrandom = 5.0,
+            minrandom = 0.0,
+            maxrandom = 1.0,
             goal_fitness = 1e-05;
     public static final int
-            varnumber = 1,
-            fitnesscases = 101,
+            varnumber = 2,
+            fitnesscases = 10000,
             randomnumber = 100;
     public static final double
             PMUT_PER_NODE  = 0.05,
@@ -51,114 +51,92 @@ public class TinyGP {
     static Random rd = new Random();
     static double [] x = new double[FSET_START];
     static double avg_len;
-    public static final double [][] targets = {{0.0000e+00,2.0000e+00},
- {1.0000e-01,2.0100e+00},
- {2.0000e-01,2.0400e+00},
- {3.0000e-01,2.0900e+00},
- {4.0000e-01,2.1600e+00},
- {5.0000e-01,2.2500e+00},
- {6.0000e-01,2.3600e+00},
- {7.0000e-01,2.4900e+00},
- {8.0000e-01,2.6400e+00},
- {9.0000e-01,2.8100e+00},
- {1.0000e+00,3.0000e+00},
- {1.1000e+00,3.2100e+00},
- {1.2000e+00,3.4400e+00},
- {1.3000e+00,3.6900e+00},
- {1.4000e+00,3.9600e+00},
- {1.5000e+00,4.2500e+00},
- {1.6000e+00,4.5600e+00},
- {1.7000e+00,4.8900e+00},
- {1.8000e+00,5.2400e+00},
- {1.9000e+00,5.6100e+00},
- {2.0000e+00,6.0000e+00},
- {2.1000e+00,6.4100e+00},
- {2.2000e+00,6.8400e+00},
- {2.3000e+00,7.2900e+00},
- {2.4000e+00,7.7600e+00},
- {2.5000e+00,8.2500e+00},
- {2.6000e+00,8.7600e+00},
- {2.7000e+00,9.2900e+00},
- {2.8000e+00,9.8400e+00},
- {2.9000e+00,1.0410e+01},
- {3.0000e+00,1.1000e+01},
- {3.1000e+00,1.1610e+01},
- {3.2000e+00,1.2240e+01},
- {3.3000e+00,1.2890e+01},
- {3.4000e+00,1.3560e+01},
- {3.5000e+00,1.4250e+01},
- {3.6000e+00,1.4960e+01},
- {3.7000e+00,1.5690e+01},
- {3.8000e+00,1.6440e+01},
- {3.9000e+00,1.7210e+01},
- {4.0000e+00,1.8000e+01},
- {4.1000e+00,1.8810e+01},
- {4.2000e+00,1.9640e+01},
- {4.3000e+00,2.0490e+01},
- {4.4000e+00,2.1360e+01},
- {4.5000e+00,2.2250e+01},
- {4.6000e+00,2.3160e+01},
- {4.7000e+00,2.4090e+01},
- {4.8000e+00,2.5040e+01},
- {4.9000e+00,2.6010e+01},
- {5.0000e+00,2.7000e+01},
- {5.1000e+00,2.8010e+01},
- {5.2000e+00,2.9040e+01},
- {5.3000e+00,3.0090e+01},
- {5.4000e+00,3.1160e+01},
- {5.5000e+00,3.2250e+01},
- {5.6000e+00,3.3360e+01},
- {5.7000e+00,3.4490e+01},
- {5.8000e+00,3.5640e+01},
- {5.9000e+00,3.6810e+01},
- {6.0000e+00,3.8000e+01},
- {6.1000e+00,3.9210e+01},
- {6.2000e+00,4.0440e+01},
- {6.3000e+00,4.1690e+01},
- {6.4000e+00,4.2960e+01},
- {6.5000e+00,4.4250e+01},
- {6.6000e+00,4.5560e+01},
- {6.7000e+00,4.6890e+01},
- {6.8000e+00,4.8240e+01},
- {6.9000e+00,4.9610e+01},
- {7.0000e+00,5.1000e+01},
- {7.1000e+00,5.2410e+01},
- {7.2000e+00,5.3840e+01},
- {7.3000e+00,5.5290e+01},
- {7.4000e+00,5.6760e+01},
- {7.5000e+00,5.8250e+01},
- {7.6000e+00,5.9760e+01},
- {7.7000e+00,6.1290e+01},
- {7.8000e+00,6.2840e+01},
- {7.9000e+00,6.4410e+01},
- {8.0000e+00,6.6000e+01},
- {8.1000e+00,6.7610e+01},
- {8.2000e+00,6.9240e+01},
- {8.3000e+00,7.0890e+01},
- {8.4000e+00,7.2560e+01},
- {8.5000e+00,7.4250e+01},
- {8.6000e+00,7.5960e+01},
- {8.7000e+00,7.7690e+01},
- {8.8000e+00,7.9440e+01},
- {8.9000e+00,8.1210e+01},
- {9.0000e+00,8.3000e+01},
- {9.1000e+00,8.4810e+01},
- {9.2000e+00,8.6640e+01},
- {9.3000e+00,8.8490e+01},
- {9.4000e+00,9.0360e+01},
- {9.5000e+00,9.2250e+01},
- {9.6000e+00,9.4160e+01},
- {9.7000e+00,9.6090e+01},
- {9.8000e+00,9.8040e+01},
- {9.9000e+00,1.0001e+02},
- {1.0000e+01,1.0200e+02}};
+    // public static final double [][] targets = None;
     
+    public static double[][] targets;
+
+    // public static String file_name = None;
+
+    public static String file = "./data/problem4_a.dat";
+
     // cache variables
     static double[] numbers;
     static char[] operations;
     static int PC;
     static double[] variables;
     static int length;
+
+
+    
+    // static void loadTargets() {
+    //     try {int i,j; String line; BufferedReader in = new BufferedReader(new FileReader(file));
+    //         line = in.readLine();
+    //         StringTokenizer tokens = new StringTokenizer(line);
+    //         targets = new double[fitnesscases][varnumber+1];
+    //         if (varnumber + randomnumber >= FSET_START )
+    //             System.out.println("too many variables and constants");
+
+    //         for (i = 0; i < fitnesscases; i ++ ) {
+    //             line = in.readLine();
+    //             tokens = new StringTokenizer(line);
+    //             for (j = 0; j <= varnumber; j++) {
+    //                 targets[i][j] = Double.parseDouble(tokens.nextToken().trim());
+    //             }
+    //         }
+    //         in.close();
+    //     }
+    //     catch(FileNotFoundException e) {
+    //         System.out.println("ERROR: Please provide a data file");
+    //         System.exit(0);
+    //     }
+    //     catch(Exception e ) {
+    //         System.out.println("ERROR: Incorrect data format");
+    //         System.exit(0);
+    //     }
+    // }
+
+
+
+    static void loadTargets() {
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            String line = in.readLine();
+            targets = new double[fitnesscases][varnumber + 1];
+            
+            // Read data lines
+            for (int i = 0; i < fitnesscases; i++) {
+                line = in.readLine();
+                if (line == null) {
+                    throw new IOException("Unexpected end of file at line " + (i + 2));
+                }
+                
+                StringTokenizer tokens = new StringTokenizer(line);
+                
+                // Parse values for each variable plus target
+                for (int j = 0; j <= varnumber; j++) {
+                    if (!tokens.hasMoreTokens()) {
+                        throw new IOException("Not enough values in line " + (i + 2));
+                    }
+                    targets[i][j] = Double.parseDouble(tokens.nextToken().trim());
+                }
+            }
+        } 
+        catch (FileNotFoundException e) {
+            System.err.println("ERROR: Data file not found: " + file);
+            System.exit(1);
+        } 
+        catch (NumberFormatException e) {
+            System.err.println("ERROR: Invalid number format in data file");
+            System.exit(1);
+        } 
+        catch (IOException e) {
+            System.err.println("ERROR: " + e.getMessage());
+            System.exit(1);
+        } 
+        catch (Exception e) {
+            System.err.println("ERROR: Unexpected error while reading data file: " + e.getMessage());
+            System.exit(1);
+        }
+    }
 
     void simplify(char[] prog) {
         // simplify the individual
@@ -615,6 +593,10 @@ public class TinyGP {
 //         GatewayServer server = new GatewayServer(this);
 //         server.start();
         System.out.println("Server started");
+
+        loadTargets();
+        System.out.println(targets[0][2]);
+
         this.evolve();
         System.out.println("TOKEN");
         for (double v : TinyGP.x) {
