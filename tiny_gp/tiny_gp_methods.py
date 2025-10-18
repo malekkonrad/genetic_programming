@@ -42,12 +42,23 @@ def map_operations(self: "TinyGP") -> dict[str, int]:
     return operations
 
 
+def create_target_file(targets: np.ndarray):
+    with open('targets.dat', 'w') as f:
+        for row in targets:
+            text = ''
+            for val in row:
+                text += (str(val) + " ")
+            f.write(f'{text}\n')
+
+
 def fit(self: "TinyGP", targets: np.ndarray, seed: int = -1):
     self.seed = seed
     self.targets = targets
     self.var_number = targets.shape[1] - 1
-    print(self.var_number)
     self.fitness_cases = targets.shape[0]
+
+    create_target_file(self.targets)
+
     self.hist = Hist()  # reset history
     assert self.var_number + self.constant_count <= FSET_START, f"Sum of variable count and constant count must be less than {FSET_START}."
     # Operations

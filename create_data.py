@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import *
 
-def generate_data():
+def generate_data(draw_charts: Optional[bool] = False):
     
     PATH = './data'
     if not os.path.exists(PATH):
@@ -14,7 +14,12 @@ def generate_data():
             points = np.linspace(domain_start, domain_end, num=num_of_points)
             y_ = formula(points)
             
-            plt.plot(points, y_)
+            # extra część rysująca wykresy
+            if draw_charts:
+                fig = plt.figure()
+                plt.plot(points, y_)
+                plt.title(f'File name: {file_name} in [{domain_start}, {domain_end}]')
+                plt.show()
 
             with open(file_name, 'w') as file:
                 file.write(f'{var_num} 100 {domain_start} {domain_end} {num_of_points}\n')
@@ -28,12 +33,15 @@ def generate_data():
             y = np.linspace(domain_start+1, domain_end+1, num=num_of_points)
             z = formula(x, y)
 
-            fig = plt.figure()
-            ax = plt.axes(projection='3d')
 
-            ax.plot3D(x, y, z, 'green')
-            ax.set_title('3D Line Plot')
-            plt.show()
+            # extra część - z robieniem wykresów
+            if draw_charts:
+                fig = plt.figure()
+                ax = plt.axes(projection='3d')
+
+                ax.plot3D(x, y, z, 'green')
+                ax.set_title(f'File name: {file_name} in [{domain_start}, {domain_end}]')
+                plt.show()
 
             with open(file_name, 'w') as file:
                 file.write(f'{var_num} 100 {domain_start} {domain_end} {num_of_points}\n')
@@ -75,3 +83,14 @@ def generate_data():
     generate_data_file('./data/problem6_b.dat', 2, lambda x, y: x**2 + 3*x*y - 7*y + 1, 0, 100, num_of_points=100)
     generate_data_file('./data/problem6_c.dat', 2, lambda x, y: x**2 + 3*x*y - 7*y + 1, -1, 1, num_of_points=100)
     generate_data_file('./data/problem6_d.dat', 2, lambda x, y: x**2 + 3*x*y - 7*y + 1, -1000, 1000, num_of_points=100)
+
+
+    # dodatkowe I
+    generate_data_file('./data/problem7_a.dat', 1, lambda x: (1/np.sqrt(2*3.1415)) * np.exp(-(x*x)/2), -4, 4, num_of_points=100)
+    generate_data_file('./data/problem7_b.dat', 1, lambda x: (1/np.sqrt(2*3.1415)) * np.exp(-(x*x)/2), 0, 20, num_of_points=100)
+
+
+    # dodatkowe II
+    generate_data_file('./data/problem8_a.dat', 1, lambda x: np.sin(x) + np.cos(x), 0, 7, num_of_points=100)
+    generate_data_file('./data/problem8_b.dat', 1, lambda x: 5*x**3 - 2*x**2 + 3*x - 17, -10, 10, num_of_points=100)
+    generate_data_file('./data/problem8_c.dat', 1, lambda x: 2* np.log(x+1), 0, 4, num_of_points=100)

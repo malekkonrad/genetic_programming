@@ -57,7 +57,7 @@ public class TinyGP {
 
     // public static String file_name = //TAG{file_name};
 
-    public static String file = "./data/problem1_a.dat";
+    public static String file = "targets.dat";
 
     // cache variables
     static double[] numbers;
@@ -70,9 +70,9 @@ public class TinyGP {
 
     static void loadTargets() {
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
-            String line = in.readLine();
+            // String line = in.readLine();
             targets = new double[fitnesscases][varnumber + 1];
-            
+            String line;
             for (int i = 0; i < fitnesscases; i++) {
                 line = in.readLine();
                 if (line == null) {

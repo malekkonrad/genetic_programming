@@ -47,7 +47,7 @@ class TinyGP:
             crossover_probability: float = 0.9,
             fitness_function: FitnessFunction = FitnessFunction.MAE,
             operations: set[Operation] | None = None,
-            goal_fitness: float = 1e-5
+            goal_fitness: float = 1e-2
     ):
         """
         Sets the parameters of the evolution.
@@ -186,21 +186,57 @@ class TinyGP:
         if targets is None:
             targets = self.targets
 
-        x = targets[:, 0]
-        y = targets[:, 1]
+        if self.var_number == 1:
+            x = targets[:, 0]
+            y = targets[:, 1]
 
-        plt.figure(figsize=(8, 5))
+            plt.figure(figsize=(8, 5))
 
-        plt.plot(x, y, label="Target Function", color="blue", linewidth=2)
+            plt.plot(x, y, label="Target Function", color="blue", linewidth=2)
 
-        plt.scatter(x, self.evaluate(x.reshape(-1, 1)), label="Evaluated Points", color="red", marker='o')
+            plt.scatter(x, self.evaluate(x.reshape(-1, 1)), label="Evaluated Points", color="red", marker='o')
 
-        plt.xlabel("x")
-        plt.ylabel("y")
-        plt.title("Target Function vs Evaluated Points")
-        plt.legend()
-        plt.grid(True)
-        plt.show()
+            plt.xlabel("x")
+            plt.ylabel("y")
+            plt.title("Target Function vs Evaluated Points")
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
+        elif self.var_number == 2:
+            x = targets[:, 0]
+            y = targets[:, 1]
+            z = targets[:, 2]
+            print('ssss')
+            print(targets.shape)
+
+            # print(x)
+            print(y.shape)
+
+
+            fig = plt.figure(figsize=(10, 8))
+            ax = fig.add_subplot(111, projection='3d')
+
+            # Punkty oryginalnej funkcji
+            ax.scatter(x, y, z, color='blue', label='Target Function', s=20)
+            
+            # Punkty przewidywane przez najlepszy osobnik
+            xy_input = np.column_stack((x, y))  # Łączymy x i y w macierz 2D
+            
+            print(xy_input.shape)
+            
+            z_predicted = self.evaluate(xy_input)
+            ax.scatter(x, y, z_predicted, color='red', label='Evaluated Points', s=20)
+
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+            ax.set_title('Target Function vs Evaluated Points (3D)')
+            ax.legend()
+            plt.show()
+        
+        else:
+            print(f"Plotting not implemented for {self.var_number} variables")
 
 
     

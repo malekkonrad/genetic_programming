@@ -15,7 +15,7 @@ public class TinyGP {
             COS = 116,
             FSET_START = 110,
             FSET_2ARG_END = 113,  //last 2 argument function, start of 1 argument functions
-            FSET_END = 113;  // last operation available
+            FSET_END = 114;  // last operation available
 
     // settings
     public static final double
@@ -27,12 +27,12 @@ public class TinyGP {
             MAX_LEN = 10000,
             POPSIZE = 100000,
             DEPTH   = 5,
-            GENERATIONS = 30,
+            GENERATIONS = 40,
             TSIZE = 2;
     public static final double
-            minrandom = -10.0,
-            maxrandom = 10.0,
-            goal_fitness = 1e-05;
+            minrandom = 0.0,
+            maxrandom = 7.0,
+            goal_fitness = 0.01;
     public static final int
             varnumber = 1,
             fitnesscases = 100,
@@ -57,7 +57,7 @@ public class TinyGP {
 
     // public static String file_name = None;
 
-    public static String file = "./data/problem1_a.dat";
+    public static String file = "targets.dat";
 
     // cache variables
     static double[] numbers;
@@ -70,9 +70,9 @@ public class TinyGP {
 
     static void loadTargets() {
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
-            String line = in.readLine();
+            // String line = in.readLine();
             targets = new double[fitnesscases][varnumber + 1];
-            
+            String line;
             for (int i = 0; i < fitnesscases; i++) {
                 line = in.readLine();
                 if (line == null) {

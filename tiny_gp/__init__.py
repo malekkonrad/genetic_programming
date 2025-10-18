@@ -4,3 +4,4 @@ from .individual import Individual
 from .entry import Entry
 from .hist import Hist
 from .tiny_gp import TinyGP
+from .genetic_solver import GeneticSolver
