@@ -57,7 +57,7 @@ public class TinyGP {
 
     // public static String file_name = //TAG{file_name};
 
-    public static String file = "./data/problem4_a.dat";
+    public static String file = "./data/problem1_a.dat";
 
     // cache variables
     static double[] numbers;

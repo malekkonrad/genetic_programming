@@ -44,7 +44,7 @@ def map_operations(self: "TinyGP") -> dict[str, int]:
 
 def fit(self: "TinyGP", targets: np.ndarray, seed: int = -1):
     self.seed = seed
-    # self.targets = targets
+    self.targets = targets
     self.var_number = targets.shape[1] - 1
     print(self.var_number)
     self.fitness_cases = targets.shape[0]

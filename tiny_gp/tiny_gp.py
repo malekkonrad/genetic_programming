@@ -14,7 +14,7 @@ class TinyGP:
     max_length: int = 10000
     population_size: int = 100000
     depth: int = 5
-    generations: int = 100
+    generations: int = 30
     tournament_size: int = 2
     min_random: float = -5
     max_random: float = 5
@@ -22,7 +22,7 @@ class TinyGP:
     constant_count: int = 100
     permutation_per_node: float = 0.05
     crossover_probability: float = 0.9
-    # targets: np.ndarray = None
+    targets: np.ndarray = None
     fitness_cases: int | None = None
     seed: int = -1
     hist: Hist = Hist()
@@ -38,7 +38,7 @@ class TinyGP:
             max_length: int = 10000,
             population_size: int = 100000,
             depth: int = 5,
-            generations: int = 100,
+            generations: int = 30,
             tournament_size: int = 2,
             min_random: float = -5,
             max_random: float = 5,
@@ -202,3 +202,5 @@ class TinyGP:
         plt.grid(True)
         plt.show()
 
+
+    

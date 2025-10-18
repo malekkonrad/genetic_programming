@@ -27,15 +27,15 @@ public class TinyGP {
             MAX_LEN = 10000,
             POPSIZE = 100000,
             DEPTH   = 5,
-            GENERATIONS = 100,
+            GENERATIONS = 30,
             TSIZE = 2;
     public static final double
-            minrandom = 0.0,
-            maxrandom = 1.0,
+            minrandom = -10.0,
+            maxrandom = 10.0,
             goal_fitness = 1e-05;
     public static final int
-            varnumber = 2,
-            fitnesscases = 10000,
+            varnumber = 1,
+            fitnesscases = 100,
             randomnumber = 100;
     public static final double
             PMUT_PER_NODE  = 0.05,
@@ -57,7 +57,7 @@ public class TinyGP {
 
     // public static String file_name = None;
 
-    public static String file = "./data/problem4_a.dat";
+    public static String file = "./data/problem1_a.dat";
 
     // cache variables
     static double[] numbers;
@@ -67,42 +67,12 @@ public class TinyGP {
     static int length;
 
 
-    
-    // static void loadTargets() {
-    //     try {int i,j; String line; BufferedReader in = new BufferedReader(new FileReader(file));
-    //         line = in.readLine();
-    //         StringTokenizer tokens = new StringTokenizer(line);
-    //         targets = new double[fitnesscases][varnumber+1];
-    //         if (varnumber + randomnumber >= FSET_START )
-    //             System.out.println("too many variables and constants");
-
-    //         for (i = 0; i < fitnesscases; i ++ ) {
-    //             line = in.readLine();
-    //             tokens = new StringTokenizer(line);
-    //             for (j = 0; j <= varnumber; j++) {
-    //                 targets[i][j] = Double.parseDouble(tokens.nextToken().trim());
-    //             }
-    //         }
-    //         in.close();
-    //     }
-    //     catch(FileNotFoundException e) {
-    //         System.out.println("ERROR: Please provide a data file");
-    //         System.exit(0);
-    //     }
-    //     catch(Exception e ) {
-    //         System.out.println("ERROR: Incorrect data format");
-    //         System.exit(0);
-    //     }
-    // }
-
-
 
     static void loadTargets() {
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
             String line = in.readLine();
             targets = new double[fitnesscases][varnumber + 1];
             
-            // Read data lines
             for (int i = 0; i < fitnesscases; i++) {
                 line = in.readLine();
                 if (line == null) {
@@ -111,7 +81,6 @@ public class TinyGP {
                 
                 StringTokenizer tokens = new StringTokenizer(line);
                 
-                // Parse values for each variable plus target
                 for (int j = 0; j <= varnumber; j++) {
                     if (!tokens.hasMoreTokens()) {
                         throw new IOException("Not enough values in line " + (i + 2));
@@ -595,8 +564,7 @@ public class TinyGP {
         System.out.println("Server started");
 
         loadTargets();
-        System.out.println(targets[0][2]);
-
+    
         this.evolve();
         System.out.println("TOKEN");
         for (double v : TinyGP.x) {
