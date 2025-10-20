@@ -27,7 +27,7 @@ public class TinyGP {
             MAX_LEN = 10000,
             POPSIZE = 100000,
             DEPTH   = 5,
-            GENERATIONS = 10,
+            GENERATIONS = 1,
             TSIZE = 2;
     public static final double
             minrandom = 5.0,

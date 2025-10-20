@@ -210,8 +210,8 @@ class TinyGP:
             z = targets[:, 2]
 
             fig = plt.figure(figsize=(10, 8))
-            ax = Axes3D(fig)
-            #ax = fig.add_subplot(111, projection='3d')
+            #ax = Axes3D(fig)
+            ax = fig.add_subplot(111, projection='3d')
 
             # Punkty oryginalnej funkcji
             ax.scatter(x, y, z, color='blue', label='Target Function', s=20)
@@ -234,7 +234,7 @@ class TinyGP:
             # FIXME is slow
             """
             import plotly.io as pio
-            pio.renderers.default = "browser"
+            pio.renderers.default = "browser"  # comment this perhaps
             import plotly.express as px
             import numpy as np
 
