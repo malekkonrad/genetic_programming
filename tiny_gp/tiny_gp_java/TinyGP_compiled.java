@@ -15,7 +15,7 @@ public class TinyGP {
             COS = 116,
             FSET_START = 110,
             FSET_2ARG_END = 113,  //last 2 argument function, start of 1 argument functions
-            FSET_END = 114;  // last operation available
+            FSET_END = 113;  // last operation available
 
     // settings
     public static final double
@@ -27,15 +27,15 @@ public class TinyGP {
             MAX_LEN = 10000,
             POPSIZE = 100000,
             DEPTH   = 5,
-            GENERATIONS = 40,
+            GENERATIONS = 10,
             TSIZE = 2;
     public static final double
-            minrandom = 0.0,
-            maxrandom = 7.0,
+            minrandom = 5.0,
+            maxrandom = -5.0,
             goal_fitness = 0.01;
     public static final int
-            varnumber = 1,
-            fitnesscases = 100,
+            varnumber = 2,
+            fitnesscases = 10000,
             randomnumber = 100;
     public static final double
             PMUT_PER_NODE  = 0.05,
@@ -533,6 +533,11 @@ public class TinyGP {
             System.out.println();
             stats( fitness, population, gen );
         }
+        time = System.nanoTime() - firstStartTime;
+        int sec = (int) (time / 1_000_000_000.0);
+        int min = sec / 60;
+        sec = sec % 60;
+        System.out.println("Took: " + min + "min " + sec + "s");
         System.out.print("PROBLEM *NOT* SOLVED\n");
     }
 

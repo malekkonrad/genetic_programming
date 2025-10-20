@@ -79,8 +79,9 @@ class Individual(BaseModel):
         return self.__str__()
 
     def _evaluate_one(self, variables: list[float]) -> float:
-        if self.var_number != len(variables):
-            raise IndexError(f"There are {self.var_number} variables but you provided: {len(variables)}")
+        # FIXME just suppress it lol
+        # if self.var_number != len(variables):
+        #     raise IndexError(f"There are {self.var_number} variables but you provided: {len(variables)}")
 
         pos: int = 0
 
@@ -132,14 +133,15 @@ class Individual(BaseModel):
             return self._evaluate_one(variables)
         if isinstance(variables, np.ndarray):
             if variables.ndim == 1:
-                if self.var_number != variables.shape[0]:
-                    raise IndexError(
-                        f"There are {self.var_number} variables but you provided: {variables.shape[0]}")
+                # if self.var_number != variables.shape[0]:
+                #     raise IndexError(
+                #         f"There are {self.var_number} variables but you provided: {variables.shape[0]}")
                 return np.asarray(self._evaluate_one(variables.tolist()))
             elif variables.ndim == 2:
-                if self.var_number != variables.shape[1]:
-                    raise IndexError(
-                        f"There are {self.var_number} variables but you provided: {variables.shape[1]}. Maybe use reshape(-1, 1)?")
+                # FIXME this error is wrong, mainly the self.var_number calculation is wrong, the function can be constant
+                # if self.var_number != variables.shape[1]:
+                #     raise IndexError(
+                #         f"There are {self.var_number} variables but you provided: {variables.shape[1]}. Maybe use reshape(-1, 1)?")
                 return np.asarray([self._evaluate_one(vs) for vs in variables])
             else:
                 raise ValueError(f"Wrong input dimension: {variables.ndim}, input must be of dimension 1 or 2.")

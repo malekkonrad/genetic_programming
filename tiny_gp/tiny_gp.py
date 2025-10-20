@@ -2,6 +2,7 @@ import json
 
 import numpy as np
 from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from tiny_gp import tiny_gp_methods, Hist, Individual, FitnessFunction, Operation, FUN_2ARG
 
@@ -207,24 +208,19 @@ class TinyGP:
             x = targets[:, 0]
             y = targets[:, 1]
             z = targets[:, 2]
-            print('ssss')
-            print(targets.shape)
-
-            # print(x)
-            print(y.shape)
-
 
             fig = plt.figure(figsize=(10, 8))
-            ax = fig.add_subplot(111, projection='3d')
+            ax = Axes3D(fig)
+            #ax = fig.add_subplot(111, projection='3d')
 
             # Punkty oryginalnej funkcji
             ax.scatter(x, y, z, color='blue', label='Target Function', s=20)
-            
+
             # Punkty przewidywane przez najlepszy osobnik
             xy_input = np.column_stack((x, y))  # Łączymy x i y w macierz 2D
-            
-            print(xy_input.shape)
-            
+
+            # print(xy_input.shape)
+
             z_predicted = self.evaluate(xy_input)
             ax.scatter(x, y, z_predicted, color='red', label='Evaluated Points', s=20)
 
@@ -234,6 +230,47 @@ class TinyGP:
             ax.set_title('Target Function vs Evaluated Points (3D)')
             ax.legend()
             plt.show()
+
+            # FIXME is slow
+            """
+            import plotly.io as pio
+            pio.renderers.default = "browser"
+            import plotly.express as px
+            import numpy as np
+
+            # Dane wejściowe
+            x = targets[:, 0]
+            y = targets[:, 1]
+            z = targets[:, 2]
+
+            # Przewidywane punkty
+            xy_input = np.column_stack((x, y))
+            z_predicted = self.evaluate(xy_input)
+
+            # Tworzymy wspólny DataFrame do wizualizacji
+            import pandas as pd
+            df = pd.DataFrame({
+                'X': np.concatenate([x, x]),
+                'Y': np.concatenate([y, y]),
+                'Z': np.concatenate([z, z_predicted]),
+                'Type': ['Target Function'] * len(x) + ['Evaluated Points'] * len(x)
+            })
+            print(df)
+            # Interaktywny wykres 3D
+            fig = px.scatter_3d(
+                df,
+                x='X',
+                y='Y',
+                z='Z',
+                color='Type',
+                symbol='Type',
+                title='Target Function vs Evaluated Points (Interactive 3D)',
+                opacity=0.8
+            )
+
+            fig.update_traces(marker=dict(size=4))
+            fig.show()
+            """
         
         else:
             print(f"Plotting not implemented for {self.var_number} variables")
