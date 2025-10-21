@@ -48,7 +48,7 @@ class TinyGP:
             crossover_probability: float = 0.9,
             fitness_function: FitnessFunction = FitnessFunction.MAE,
             operations: set[Operation] | None = None,
-            goal_fitness: float = 1e-2
+            goal_fitness: float = 1e-5
     ):
         """
         Sets the parameters of the evolution.
@@ -126,6 +126,7 @@ class TinyGP:
             "crossover_probability": self.crossover_probability,
             "targets": self.targets.tolist(),
             "fitness_cases": self.fitness_cases,
+            "goal_fitness": self.goal_fitness,
             "seed": self.seed,
             "hist": self.hist.model_dump(),
             "best_individual": (
