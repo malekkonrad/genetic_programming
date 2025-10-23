@@ -18,7 +18,7 @@ class GeneticSolver:
         self.data_file_name = data_file
         self.data_file_path = f'./data/{data_file}.dat'
         
-    def solve(self, operations: Optional[list[Operation]] = None, generations: Optional[int] = 30) -> Hist:
+    def solve(self, operations: Optional[list[Operation]] = None, generations: Optional[int] = 100) -> Hist:
 
         targets = list()
 

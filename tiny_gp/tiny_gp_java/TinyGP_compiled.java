@@ -27,12 +27,12 @@ public class TinyGP {
             MAX_LEN = 10000,
             POPSIZE = 100000,
             DEPTH   = 5,
-            GENERATIONS = 1,
+            GENERATIONS = 30,
             TSIZE = 2;
     public static final double
             minrandom = 5.0,
             maxrandom = -5.0,
-            goal_fitness = 0.01;
+            goal_fitness = 1e-05;
     public static final int
             varnumber = 2,
             fitnesscases = 10000,
