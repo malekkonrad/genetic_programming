@@ -1,5 +1,8 @@
 import json
-
+import matplotlib.pyplot as plt
+import imageio.v2 as imageio
+import numpy as np
+import io
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -183,6 +186,96 @@ class TinyGP:
         """Predict result from variables using the best individual."""
         return self.best_individual.evaluate(variables)
 
+    def to_gif(self, file: str):
+        """Generate gif file of the target function, save to file"""
+        targets = self.targets
+        if targets.shape[1] > 2:
+            raise ValueError(f"Support for only 2d functions :(")
+
+        x_lim = [targets[:, 0].min(), targets[:, 0].max()]
+        y_lim = [targets[:, 1].min() * 1.2, targets[:, 1].max() * 1.2]  # expand by 20%
+
+        # Prepare storage for GIF frames
+        frames = []
+
+        # Loop through generations and capture plots as images in memory
+        for entry in self.hist.entries:
+            x = targets[:, 0]
+            y = targets[:, 1]
+
+            # Create the figure
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.plot(x, y, label="Target Function", color="blue", linewidth=2)
+            ax.scatter(
+                x,
+                entry.best_individual.evaluate(x.reshape(-1, 1)),
+                label="Evaluated Points",
+                color="red",
+                marker="o"
+            )
+            plt.xlim(x_lim)
+            plt.ylim(y_lim)
+            ax.set_xlabel("x")
+            ax.set_ylabel("y")
+            ax.set_title(f"Target Function vs Evaluated Points — Gen {entry.gen}")
+            ax.legend()
+            ax.grid(True)
+
+            # Save figure to memory as image
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png')
+            plt.close(fig)
+            buf.seek(0)
+            frames.append(imageio.imread(buf))
+            buf.close()
+
+        # Save all frames as an animated GIF
+        imageio.mimsave(file, frames, duration=150)  # duration in seconds per frame
+
+    def to_mp4(self, file: str):
+        """Generate video file of the target function, save to file"""
+        targets = self.targets
+        if targets.shape[1] > 2:
+            raise ValueError(f"Support for only 2d functions :(")
+
+        x_lim = [targets[:, 0].min(), targets[:, 0].max()]
+        y_lim = [targets[:, 1].min() * 1.2, targets[:, 1].max() * 1.2]  # add 20% to the y limit
+
+        # Create a video writer (H.264 codec)
+        with imageio.get_writer(file, fps=5, codec="libx264") as writer:
+            for entry in self.hist.entries:
+                x = targets[:, 0]
+                y = targets[:, 1]
+
+                # Create the figure
+                fig, ax = plt.subplots(figsize=(8, 5.12))
+                ax.plot(x, y, label="Target Function", color="blue", linewidth=2)
+                ax.scatter(
+                    x,
+                    entry.best_individual.evaluate(x.reshape(-1, 1)),
+                    label="Evaluated Points",
+                    color="red",
+                    marker="o"
+                )
+                plt.xlim(x_lim)
+                plt.ylim(y_lim)
+                ax.set_xlabel("x")
+                ax.set_ylabel("y")
+                ax.set_title(f"Target Function vs Evaluated Points — Gen {entry.gen}")
+                ax.legend()
+                ax.grid(True)
+
+                # Save figure to memory as image frame
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png')
+                plt.close(fig)
+                buf.seek(0)
+                frame = imageio.imread(buf)
+                buf.close()
+
+                # Append frame to the video
+                writer.append_data(frame)
+
     def plot(self, targets: np.ndarray | None = None):
         """Plot the target function and the evaluation."""
         if targets is None:
@@ -252,10 +345,6 @@ class TinyGP:
 
             fig.update_traces(marker=dict(size=3))
             fig.show()
-            
-        
+
         else:
             print(f"Plotting not implemented for {self.var_number} variables")
-
-
-    

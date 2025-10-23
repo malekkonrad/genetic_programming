@@ -115,3 +115,9 @@ class GeneticSolver:
         plt.legend()
         plt.grid(True)
         plt.show()
+
+    def to_gif(self):
+        self.tiny_gp.to_gif(f"./figs/{self.data_file_name}.gif")
+
+    def to_mp4(self):
+        self.tiny_gp.to_mp4(f"./figs/{self.data_file_name}.mp4")
