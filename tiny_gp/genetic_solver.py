@@ -53,18 +53,38 @@ class GeneticSolver:
 
         return self.hist
 
+    @classmethod
+    def from_json(cls, data_file: str):
+        instance = cls(data_file)
 
+        targets = list()
+
+        with open(instance.data_file_path, "r") as f:
+            line = f.readline()
+            varnumber, randomnumber, minrandom, maxrandom, fitnesscases = [float(s) for s in line.split()]
+            varnumber = int(varnumber)
+            randomnumber = int(randomnumber)
+            fitnesscases = int(fitnesscases)
+            for line in f:
+                targets.extend([float(s) for s in line.split()])
+
+        targets_np = np.array(targets)
+        targets_np = targets_np.reshape([fitnesscases, varnumber + 1])
+
+        instance.targets_to_compare = targets_np
+        instance.tiny_gp = TinyGP.from_json(f'./gps/gp_{data_file}.json')
+        instance.hist = instance.tiny_gp.hist
+
+        return instance
 
     def plot(self):
         self.tiny_gp.plot()
-    
 
     def _save_gp(self):
         PATH = './gps'
         if not os.path.exists(PATH):
             os.makedirs(PATH)
         self.tiny_gp.save_json(f'{PATH}/gp_{self.data_file_name}.json')
-
 
     def _save_hist(self):
         PATH = './hists'
@@ -75,11 +95,8 @@ class GeneticSolver:
         with open(f'{PATH}/hist_{self.data_file_name}.json', 'w') as f:
             json.dump(x, f)
 
-
     def evaluate(self, vars):
         return self.tiny_gp.evaluate(vars)
-    
-
 
     def compare_with_another(self, solver2: "GeneticSolver"):
         x = self.targets_to_compare[:, 0]
