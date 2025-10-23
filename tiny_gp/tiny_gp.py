@@ -206,36 +206,9 @@ class TinyGP:
             plt.show()
 
         elif self.var_number == 2:
-            x = targets[:, 0]
-            y = targets[:, 1]
-            z = targets[:, 2]
-
-            fig = plt.figure(figsize=(10, 8))
-            #ax = Axes3D(fig)
-            ax = fig.add_subplot(111, projection='3d')
-
-            # Punkty oryginalnej funkcji
-            ax.scatter(x, y, z, color='blue', label='Target Function', s=20)
-
-            # Punkty przewidywane przez najlepszy osobnik
-            xy_input = np.column_stack((x, y))  # Łączymy x i y w macierz 2D
-
-            # print(xy_input.shape)
-
-            z_predicted = self.evaluate(xy_input)
-            ax.scatter(x, y, z_predicted, color='red', label='Evaluated Points', s=20)
-
-            ax.set_xlabel('X')
-            ax.set_ylabel('Y')
-            ax.set_zlabel('Z')
-            ax.set_title('Target Function vs Evaluated Points (3D)')
-            ax.legend()
-            plt.show()
-
-            # FIXME is slow
-            """
+            
             import plotly.io as pio
-            pio.renderers.default = "browser"  # comment this perhaps
+            # pio.renderers.default = "browser"  # comment this perhaps
             import plotly.express as px
             import numpy as np
 
@@ -244,11 +217,10 @@ class TinyGP:
             y = targets[:, 1]
             z = targets[:, 2]
 
-            # Przewidywane punkty
+            
             xy_input = np.column_stack((x, y))
             z_predicted = self.evaluate(xy_input)
 
-            # Tworzymy wspólny DataFrame do wizualizacji
             import pandas as pd
             df = pd.DataFrame({
                 'X': np.concatenate([x, x]),
@@ -256,8 +228,8 @@ class TinyGP:
                 'Z': np.concatenate([z, z_predicted]),
                 'Type': ['Target Function'] * len(x) + ['Evaluated Points'] * len(x)
             })
-            print(df)
-            # Interaktywny wykres 3D
+            
+
             fig = px.scatter_3d(
                 df,
                 x='X',
@@ -266,12 +238,21 @@ class TinyGP:
                 color='Type',
                 symbol='Type',
                 title='Target Function vs Evaluated Points (Interactive 3D)',
-                opacity=0.8
+                opacity=0.8,
             )
 
-            fig.update_traces(marker=dict(size=4))
+            fig.update_layout(
+                scene=dict(
+                    aspectmode='cube',  
+                    camera=dict(eye=dict(x=1, y=1, z=1))
+                ),
+                width=800,
+                height=600
+            )
+
+            fig.update_traces(marker=dict(size=3))
             fig.show()
-            """
+            
         
         else:
             print(f"Plotting not implemented for {self.var_number} variables")

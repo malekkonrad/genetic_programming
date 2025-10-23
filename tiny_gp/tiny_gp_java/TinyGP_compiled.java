@@ -30,12 +30,12 @@ public class TinyGP {
             GENERATIONS = 30,
             TSIZE = 2;
     public static final double
-            minrandom = 5.0,
-            maxrandom = -5.0,
-            goal_fitness = 1e-05;
+            minrandom = -5.0,
+            maxrandom = 5.0,
+            goal_fitness = 0.001;
     public static final int
-            varnumber = 2,
-            fitnesscases = 10000,
+            varnumber = 1,
+            fitnesscases = 101,
             randomnumber = 100;
     public static final double
             PMUT_PER_NODE  = 0.05,
