@@ -2,6 +2,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.io.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TinyGP {
     // operations
@@ -51,11 +54,7 @@ public class TinyGP {
     static Random rd = new Random();
     static double [] x = new double[FSET_START];
     static double avg_len;
-    // public static final double [][] targets = None;
-    
     public static double[][] targets;
-
-    // public static String file_name = None;
 
     public static String file = "targets.dat";
 
@@ -66,7 +65,16 @@ public class TinyGP {
     static double[] variables;
     static int length;
 
+    // executors
+    static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+    static final ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
 
+    class EvaluationContext {
+        int length;
+        double[] numbers;
+        char[] operations;
+        double[] variables;
+    }
 
     static void loadTargets() {
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
@@ -78,9 +86,9 @@ public class TinyGP {
                 if (line == null) {
                     throw new IOException("Unexpected end of file at line " + (i + 2));
                 }
-                
+
                 StringTokenizer tokens = new StringTokenizer(line);
-                
+
                 for (int j = 0; j <= varnumber; j++) {
                     if (!tokens.hasMoreTokens()) {
                         throw new IOException("Not enough values in line " + (i + 2));
@@ -88,51 +96,51 @@ public class TinyGP {
                     targets[i][j] = Double.parseDouble(tokens.nextToken().trim());
                 }
             }
-        } 
+        }
         catch (FileNotFoundException e) {
             System.err.println("ERROR: Data file not found: " + file);
             System.exit(1);
-        } 
+        }
         catch (NumberFormatException e) {
             System.err.println("ERROR: Invalid number format in data file");
             System.exit(1);
-        } 
+        }
         catch (IOException e) {
             System.err.println("ERROR: " + e.getMessage());
             System.exit(1);
-        } 
+        }
         catch (Exception e) {
             System.err.println("ERROR: Unexpected error while reading data file: " + e.getMessage());
             System.exit(1);
         }
     }
 
-    void simplify(char[] prog) {
+    void simplify(char[] prog, EvaluationContext ctx) {
         // simplify the individual
         // evaluate operations between constants
         // put operations and evaluation result into separate arrays (operations and numbers)
         // 0 in operations means it's a number
         // ADD, SUB, MUL, DIV - operations
-        // 1 + var_id - it's a variable
+        // FSET_END + 1 + var_id - it's a variable
         int ptr = 0;
-        operations = new char[prog.length];
-        Arrays.fill(operations, '\0');
-        numbers = new double[prog.length];
+        ctx.operations = new char[prog.length];
+        Arrays.fill(ctx.operations, '\0');
+        ctx.numbers = new double[prog.length];
         for (char primitive : prog) {
             if (primitive < varnumber) {  // it's the variable
                 // variables start from 1 to differentiate them operations
-                operations[ptr++] = ++primitive; // add that 1
+                ctx.operations[ptr++] = ++primitive; // add that 1
             } else if (primitive < FSET_START) {  // it's a number
-                numbers[ptr] = x[primitive];
+                ctx.numbers[ptr] = x[primitive];
                 while (ptr > 1) {
                     // for 2 argument functions
-                    if (operations[ptr - 2] >= FSET_START  // before must be an operation
-                            && operations[ptr - 2] <= FSET_2ARG_END // before must be an 2 argument operation (skip variables)
-                            && operations[ptr - 1] == 0) {  // number is following the operation
-                        int opp = operations[ptr - 2];
-                        operations[ptr - 2] = 0;
-                        double num1 = numbers[ptr - 1];
-                        double num2 = numbers[ptr];
+                    if (ctx.operations[ptr - 2] >= FSET_START  // before must be an operation
+                            && ctx.operations[ptr - 2] <= FSET_2ARG_END // before must be an 2 argument operation (skip variables)
+                            && ctx.operations[ptr - 1] == 0) {  // number is following the operation
+                        int opp = ctx.operations[ptr - 2];
+                        ctx.operations[ptr - 2] = 0;
+                        double num1 = ctx.numbers[ptr - 1];
+                        double num2 = ctx.numbers[ptr];
                         double result;
                         if (opp == ADD) {
                             result = num1 + num2;
@@ -149,13 +157,13 @@ public class TinyGP {
                             throw new IllegalArgumentException();
                         }
                         ptr -= 2;
-                        numbers[ptr] = result;
+                        ctx.numbers[ptr] = result;
                         // for 1 argument functions
-                    } else if (operations[ptr - 1] > FSET_2ARG_END  // before must be a 1 argument operation
-                            && operations[ptr - 1] <= FSET_END) {  // before must be an 1 argument operation (skip variables)
-                        int opp = operations[ptr - 1];
-                        operations[ptr - 1] = 0;
-                        double num = numbers[ptr];
+                    } else if (ctx.operations[ptr - 1] > FSET_2ARG_END  // before must be a 1 argument operation
+                            && ctx.operations[ptr - 1] <= FSET_END) {  // before must be an 1 argument operation (skip variables)
+                        int opp = ctx.operations[ptr - 1];
+                        ctx.operations[ptr - 1] = 0;
+                        double num = ctx.numbers[ptr];
                         double result;
                         if (opp == EXP) {
                             result = num <= EXPONENT_CUT_OUT ? Math.exp(num) : num;
@@ -163,32 +171,32 @@ public class TinyGP {
                             result = Math.sin(Math.toRadians(num));
                         } else if (opp == COS) {
                             result = Math.cos(Math.toRadians(num));
-                    } else {
+                        } else {
                             throw new IllegalArgumentException();
                         }
                         ptr -= 1;
-                        numbers[ptr] = result;
+                        ctx.numbers[ptr] = result;
                     } else {
                         break;
                     }
                 }
                 ptr++;
             } else {  // it's an operation
-                operations[ptr++] = primitive;
+                ctx.operations[ptr++] = primitive;
             }
         }
-        length = ptr;
+        ctx.length = ptr;
     }
 
-    double runIterative(double[] stack) {
+    static double run(double[] stack, EvaluationContext ctx) {
         int sp = 0;
-        int pc = length - 1;
+        int pc = ctx.length - 1;
 
         while (pc >= 0) {
-            int primitive = operations[pc--];
+            int primitive = ctx.operations[pc--];
 
             if (primitive < FSET_START) {
-                stack[sp++] = (primitive < varnumber) ? numbers[pc + 1] : variables[primitive - 1];
+                stack[sp++] = (primitive < varnumber) ? ctx.numbers[pc + 1] : ctx.variables[primitive - 1];
             } else {
                 double result;
                 switch (primitive) {
@@ -198,9 +206,7 @@ public class TinyGP {
                     case DIV -> {
                         double num = stack[--sp];
                         double den = stack[--sp];
-                        if (Math.abs(den) <= DIVISION_CUT_OUT)
-                            result = num;
-                        else result = num / den;
+                        result = Math.abs(den) <= DIVISION_CUT_OUT ? num : num / den;
                     }
                     case EXP -> {
                         double num = stack[--sp];
@@ -213,20 +219,16 @@ public class TinyGP {
                 stack[sp++] = result;
             }
         }
-
         return stack[--sp];
     }
 
-    double fitness_function_seq_iter(char [] prog) {
+    double fitness_function(char [] prog, EvaluationContext ctx) {
         double result, actual, fit = 0.0;
-        simplify(prog);
-        double[] stack = new double[length];
+        simplify(prog, ctx);
+        double[] stack = new double[ctx.length];
         for (int i = 0; i < fitnesscases; ++i ) {
-            for (int j = 0; j < varnumber; ++j) {
-                variables[j] = targets[i][j];
-            }
-            PC = 0;
-            result = runIterative(stack);
+            System.arraycopy(targets[i], 0, ctx.variables, 0, varnumber);
+            result = run(stack, ctx);
             actual = targets[i][varnumber];
             fit += Math.abs(result - actual);
         }
@@ -326,7 +328,9 @@ public class TinyGP {
 
         for ( i = 0; i < n; i ++ ) {
             pop[i] = create_random_individual( depth );
-            fitness[i] = fitness_function_seq_iter( pop[i] );
+            EvaluationContext ctx = new EvaluationContext();
+            ctx.variables = new double[variables.length];
+            fitness[i] = fitness_function(pop[i], ctx);
         }
         return( pop );
     }
@@ -489,14 +493,13 @@ public class TinyGP {
     static final DecimalFormat df = new DecimalFormat("0.00");
     void evolve() {
         setup();
-        int gen, indivs, offspring, parent1, parent2, parent;
-        double newfit;
-        char []newind;
+        int gen;
         print_params();
         stats( fitness, population, 0 );
         long firstStartTime = System.nanoTime();
         long startTime;
         long time;
+
         for ( gen = 1; gen < GENERATIONS; gen ++ ) {
             if (  fbestpop > -goal_fitness ) {
                 time = System.nanoTime() - firstStartTime;
@@ -505,40 +508,70 @@ public class TinyGP {
                 sec = sec % 60;
                 System.out.println("Took: " + min + "min " + sec + "s");
                 System.out.print("PROBLEM SOLVED\n");
+                executor.shutdown();
                 return;
             }
+
             startTime = System.nanoTime();
-            for ( indivs = 0; indivs < POPSIZE; indivs ++ ) {
-                if ( rd.nextDouble() < CROSSOVER_PROB  ) {
-                    parent1 = tournament( fitness, TSIZE );
-                    parent2 = tournament( fitness, TSIZE );
-                    newind = crossover( population[parent1], population[parent2] );
-                }
-                else {
-                    parent = tournament( fitness, TSIZE );
-                    newind = mutation( population[parent], PMUT_PER_NODE );
-                }
-                newfit = fitness_function_seq_iter(newind);
-                offspring = negative_tournament( fitness, TSIZE );
-                population[offspring] = newind;
-                fitness[offspring] = newfit;
-                int progress = (indivs / 1000) + 1;
-                if (indivs % 1000 == 0) {
-                    time = System.nanoTime() - startTime;
-                    System.out.println("\\r["+"■".repeat(progress)+" ".repeat(100 - progress)+"] "
-                            +progress+"%  "
-                            + df.format(time/1_000_000_000.0) +"s");
-                }
+
+            int chunkSize = (int) Math.ceil((double) POPSIZE / NUM_THREADS);
+            CountDownLatch latch = new CountDownLatch(NUM_THREADS);
+
+            for (int t = 0; t < NUM_THREADS; t++) {
+                int start = t * chunkSize;
+                int end = Math.min(start + chunkSize, POPSIZE);
+
+                int finalT = t;
+                long finalStartTime = startTime;
+                int updateInterval = (end - start) / 100;
+                executor.submit(() -> {
+                    EvaluationContext ctx = new EvaluationContext();
+                    ctx.variables = new double[variables.length];
+
+                    for (int i = start; i < end; i++) {
+                        char[] newind;
+                        double newfit;
+
+                        if (rd.nextDouble() < CROSSOVER_PROB) {
+                            int parent1 = tournament(fitness, TSIZE);
+                            int parent2 = tournament(fitness, TSIZE);
+                            newind = crossover(population[parent1], population[parent2]);
+                        } else {
+                            int parent = tournament(fitness, TSIZE);
+                            newind = mutation(population[parent], PMUT_PER_NODE);
+                        }
+
+                        newfit = fitness_function(newind, ctx);
+
+                        int offspring = negative_tournament(fitness, TSIZE);
+                        population[offspring] = newind;
+                        fitness[offspring] = newfit;
+
+                        if (i % updateInterval == 0 && finalT == 0) { // print progress only from one thread
+                            long timeThread = System.nanoTime() - finalStartTime;
+                            int progress = (i / updateInterval) + 1;
+                            System.out.println("[" + "■".repeat(progress)
+                                    + " ".repeat(100 - progress) + "] "
+                                    + progress + "%  "
+                                    + df.format(timeThread / 1_000_000_000.0) + "s\\r");
+                        }
+                    }
+                    latch.countDown();
+                });
             }
+
+            try {
+                latch.await(); // wait for all threads
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("Evolution interrupted: " + e.getMessage());
+            }
+
             System.out.println();
             stats( fitness, population, gen );
         }
-        time = System.nanoTime() - firstStartTime;
-        int sec = (int) (time / 1_000_000_000.0);
-        int min = sec / 60;
-        sec = sec % 60;
-        System.out.println("Took: " + min + "min " + sec + "s");
         System.out.print("PROBLEM *NOT* SOLVED\n");
+        executor.shutdown();
     }
 
     public void setup() {
@@ -569,7 +602,7 @@ public class TinyGP {
         System.out.println("Server started");
 
         loadTargets();
-    
+
         this.evolve();
         System.out.println("TOKEN");
         for (double v : TinyGP.x) {
@@ -588,48 +621,48 @@ public class TinyGP {
     }
 }
 
-    class Hist {
-        public int gen;
-        public double avg_fitness;
-        public double best_fitness;
-        public double avg_size;
-        public char[] best_individual;
+class Hist {
+    public int gen;
+    public double avg_fitness;
+    public double best_fitness;
+    public double avg_size;
+    public char[] best_individual;
 
-        public Hist(int gen, double avg_fitness, double best_fitness, double avg_size, char[] best_individual) {
-            this.gen = gen;
-            this.avg_fitness = avg_fitness;
-            this.best_fitness = best_fitness;
-            this.avg_size = avg_size;
-            this.best_individual = new char[best_individual.length];
-            System.arraycopy(best_individual, 0, this.best_individual, 0, best_individual.length);
-        }
-
-        public char[] getBest_individual() {
-            return best_individual;
-        }
-
-        public double getAvg_size() {
-            return avg_size;
-        }
-
-        public double getBest_fitness() {
-            return best_fitness;
-        }
-
-        public double getAvg_fitness() {
-            return avg_fitness;
-        }
-
-        public int getGen() {
-            return gen;
-        }
-
-        @Override
-        public String toString() {
-        return gen + " " +
-               avg_fitness + " " +
-               best_fitness + " " +
-               avg_size + " " +
-               Arrays.toString(new String(best_individual).chars().toArray()).replaceAll("[\\[\\],]", "");
-        }
+    public Hist(int gen, double avg_fitness, double best_fitness, double avg_size, char[] best_individual) {
+        this.gen = gen;
+        this.avg_fitness = avg_fitness;
+        this.best_fitness = best_fitness;
+        this.avg_size = avg_size;
+        this.best_individual = new char[best_individual.length];
+        System.arraycopy(best_individual, 0, this.best_individual, 0, best_individual.length);
     }
+
+    public char[] getBest_individual() {
+        return best_individual;
+    }
+
+    public double getAvg_size() {
+        return avg_size;
+    }
+
+    public double getBest_fitness() {
+        return best_fitness;
+    }
+
+    public double getAvg_fitness() {
+        return avg_fitness;
+    }
+
+    public int getGen() {
+        return gen;
+    }
+
+    @Override
+    public String toString() {
+        return gen + " " +
+                avg_fitness + " " +
+                best_fitness + " " +
+                avg_size + " " +
+                Arrays.toString(new String(best_individual).chars().toArray()).replaceAll("[\\[\\],]", "");
+    }
+}

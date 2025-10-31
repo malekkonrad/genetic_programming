@@ -1,9 +1,7 @@
 import re
 import subprocess
-import threading
 
 import numpy as np
-from py4j.java_gateway import JavaGateway
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

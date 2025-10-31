@@ -96,3 +96,15 @@ def generate_data(draw_charts: Optional[bool] = False):
     generate_data_file('./data/problem8_a.dat', 1, lambda x: np.sin(x) + np.cos(x), 0, 7, num_of_points=100)
     generate_data_file('./data/problem8_b.dat', 1, lambda x: 5*x**3 - 2*x**2 + 3*x - 17, -10, 10, num_of_points=100)
     generate_data_file('./data/problem8_c.dat', 1, lambda x: 2* np.log(x+1), 0, 4, num_of_points=100)
+
+    # 9, 2.1
+    generate_data_file('./data/problem9_a.dat', 1, lambda x: np.sin(x) + np.cos(x), -3.14, 3.14, num_of_points=100)
+    generate_data_file('./data/problem9_b.dat', 1, lambda x: np.sin(x) + np.cos(x), 0, 7, num_of_points=100)
+    generate_data_file('./data/problem9_c.dat', 1, lambda x: np.sin(x) + np.cos(x), 0, 100, num_of_points=100)
+    generate_data_file('./data/problem9_d.dat', 1, lambda x: np.sin(x) + np.cos(x), -100, 100, num_of_points=100)
+
+    # 10, 2.2
+    generate_data_file('./data/problem10_a.dat', 1, lambda x: np.sin(x + 3.141592 / 2), 0, 3.14*2, num_of_points=100)
+
+    # 11, 2.3
+    generate_data_file('./data/problem10_a.dat', 1, lambda x: np.tan(2*x + 1), -3.14/2, 3.14/2, num_of_points=100)
