@@ -151,6 +151,15 @@ class TinyGP:
 
         instance = cls()
 
+        if "best_individual" in data and data["best_individual"]:
+            best = data.pop("best_individual")
+            instance.best_individual = Individual.model_validate(best)
+            opps = best["operations"]
+            end = opps.pop("FSET_END")
+            opps.pop("FSET_2ARG_END")
+            instance.operations = {Operation[opp] for opp, val in opps.items() if val <= end}  # it's so ugly, won't work all the time
+            instance.best_individual.operations = instance._map_operations()  # add operations manually, ugh
+
         if "targets" in data:
             instance.targets = np.asarray(data.pop("targets"))
 
@@ -158,10 +167,6 @@ class TinyGP:
             instance.hist = Hist.model_validate(data.pop("hist"))
             for e in instance.hist.entries:
                 e.best_individual.operations = instance._map_operations()  # add operations manually, ugh
-
-        if "best_individual" in data and data["best_individual"]:
-            instance.best_individual = Individual.model_validate(data.pop("best_individual"))
-            instance.best_individual.operations = instance._map_operations()  # add operations manually, ugh
 
         for attr in cls.__dict__.keys():
             if attr in data:
