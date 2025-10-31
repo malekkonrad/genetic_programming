@@ -107,4 +107,4 @@ def generate_data(draw_charts: Optional[bool] = False):
     generate_data_file('./data/problem10_a.dat', 1, lambda x: np.sin(x + 3.141592 / 2), 0, 3.14*2, num_of_points=100)
 
     # 11, 2.3
-    generate_data_file('./data/problem10_a.dat', 1, lambda x: np.tan(2*x + 1), -3.14/2, 3.14/2, num_of_points=100)
+    generate_data_file('./data/problem11_a.dat', 1, lambda x: np.tan(2*x + 1), -3.14/2, 3.14/2, num_of_points=100)
