@@ -98,7 +98,7 @@ class GeneticSolver:
     def evaluate(self, vars):
         return self.tiny_gp.evaluate(vars)
 
-    def compare_with_another(self, solver2: "GeneticSolver"):
+    def compare_with_another(self, solver2: "GeneticSolver", label_self: str = "Evaluated Points with exp", label_other: str = "Evaluated Points with exp"):
         x = self.targets_to_compare[:, 0]
         y = solver2.targets_to_compare[:, 1]
 
@@ -106,8 +106,8 @@ class GeneticSolver:
 
         plt.plot(x, y, label="Target Function", color="blue", linewidth=2)
 
-        plt.scatter(x, self.evaluate(x.reshape(-1, 1)), label="Evaluated Points without exp", color="red", marker='o')
-        plt.scatter(x, solver2.evaluate(x.reshape(-1, 1)), label="Evaluated Points with exp", color="green", marker='o')
+        plt.scatter(x, self.evaluate(x.reshape(-1, 1)), label=label_self, color="red", marker='o')
+        plt.scatter(x, solver2.evaluate(x.reshape(-1, 1)), label=label_other, color="green", marker='o')
 
         plt.xlabel("x")
         plt.ylabel("y")

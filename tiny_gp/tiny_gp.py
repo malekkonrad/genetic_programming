@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import imageio.v2 as imageio
 import numpy as np
 import io
-import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -281,8 +280,9 @@ class TinyGP:
                 # Append frame to the video
                 writer.append_data(frame)
 
-    def plot(self, targets: np.ndarray | None = None):
+    def plot(self, targets: np.ndarray | None = None, validation: np.ndarray | None = None):
         """Plot the target function and the evaluation."""
+        global np  # FIXME wtf python ???
         if targets is None:
             targets = self.targets
 
@@ -292,9 +292,16 @@ class TinyGP:
 
             plt.figure(figsize=(8, 5))
 
-            plt.plot(x, y, label="Target Function", color="blue", linewidth=2)
+            if validation is not None:
+                x_full = np.hstack([x, validation[:, 0]])
+                y_full = np.hstack([y, validation[:, 1]])
+                plt.plot(x_full, y_full, label="Target Function", color="blue", linewidth=2)
 
             plt.scatter(x, self.evaluate(x.reshape(-1, 1)), label="Evaluated Points", color="red", marker='o')
+
+            if validation is not None:
+                x = validation[:, 0]
+                plt.scatter(x, self.evaluate(x.reshape(-1, 1)), label="Predicted Points", color="green", marker='o')
 
             plt.xlabel("x")
             plt.ylabel("y")

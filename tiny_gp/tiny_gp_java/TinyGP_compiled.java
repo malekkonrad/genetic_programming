@@ -30,7 +30,7 @@ public class TinyGP {
             MAX_LEN = 10000,
             POPSIZE = 100000,
             DEPTH   = 5,
-            GENERATIONS = 50,
+            GENERATIONS = 100,
             TSIZE = 2;
     public static final double
             minrandom = -5.0,
@@ -38,7 +38,7 @@ public class TinyGP {
             goal_fitness = 1e-05;
     public static final int
             varnumber = 1,
-            fitnesscases = 100,
+            fitnesscases = 600,
             randomnumber = 100;
     public static final double
             PMUT_PER_NODE  = 0.05,
@@ -570,6 +570,11 @@ public class TinyGP {
             System.out.println();
             stats( fitness, population, gen );
         }
+        time = System.nanoTime() - firstStartTime;
+        int sec = (int) (time / 1_000_000_000.0);
+        int min = sec / 60;
+        sec = sec % 60;
+        System.out.println("Took: " + min + "min " + sec + "s");
         System.out.print("PROBLEM *NOT* SOLVED\n");
         executor.shutdown();
     }

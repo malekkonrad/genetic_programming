@@ -570,6 +570,11 @@ public class TinyGP {
             System.out.println();
             stats( fitness, population, gen );
         }
+        time = System.nanoTime() - firstStartTime;
+        int sec = (int) (time / 1_000_000_000.0);
+        int min = sec / 60;
+        sec = sec % 60;
+        System.out.println("Took: " + min + "min " + sec + "s");
         System.out.print("PROBLEM *NOT* SOLVED\n");
         executor.shutdown();
     }
