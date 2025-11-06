@@ -296,6 +296,8 @@ class TinyGP:
                 x_full = np.hstack([x, validation[:, 0]])
                 y_full = np.hstack([y, validation[:, 1]])
                 plt.plot(x_full, y_full, label="Target Function", color="blue", linewidth=2)
+            else:
+                plt.plot(x, y, label="Target Function", color="blue", linewidth=2)
 
             plt.scatter(x, self.evaluate(x.reshape(-1, 1)), label="Evaluated Points", color="red", marker='o')
 

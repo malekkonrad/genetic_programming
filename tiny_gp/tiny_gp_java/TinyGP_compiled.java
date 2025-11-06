@@ -13,12 +13,12 @@ public class TinyGP {
             SUB = 111,
             MUL = 112,
             DIV = 113,
-            EXP = 116,
-            SIN = 114,
-            COS = 115,
+            EXP = 114,
+            SIN = 115,
+            COS = 116,
             FSET_START = 110,
             FSET_2ARG_END = 113,  //last 2 argument function, start of 1 argument functions
-            FSET_END = 115;  // last operation available
+            FSET_END = 113;  // last operation available
 
     // settings
     public static final double
@@ -30,15 +30,15 @@ public class TinyGP {
             MAX_LEN = 10000,
             POPSIZE = 100000,
             DEPTH   = 5,
-            GENERATIONS = 100,
+            GENERATIONS = 30,
             TSIZE = 2;
     public static final double
             minrandom = -5.0,
             maxrandom = 5.0,
-            goal_fitness = 1e-05;
+            goal_fitness = 0.001;
     public static final int
             varnumber = 1,
-            fitnesscases = 600,
+            fitnesscases = 101,
             randomnumber = 100;
     public static final double
             PMUT_PER_NODE  = 0.05,
